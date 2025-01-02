@@ -5,6 +5,7 @@ from omegaconf import OmegaConf
 import hydra
 import os
 import time
+import numpy as np
 
 
 ## see dataset/calvin_debug_dataset/training/.hydra/merged_config.yaml
@@ -25,11 +26,23 @@ env = PlayTableSimEnv(
     control_freq=30,
 )
 
+## Replay
+# start_id = 358482
+# for i in range(1000, 10000): 
+#     path = f"dataset/calvin_debug_dataset/training/episode_{start_id + i:07d}.npz"
+#     data = np.load(path)
+#     actions, rel_actions, robot_obs, scene_obs = data['actions'], data['rel_actions'], data['robot_obs'], data['scene_obs']
+
+#     print(i)
+#     env.reset(robot_obs=robot_obs, scene_obs=scene_obs)
+#     env.render()
+
+## Evaluate
 eval_sequences = get_sequences(1000)
 
-for initial_state, eval_sequence in eval_sequences:
+for i, (initial_state, eval_sequence) in enumerate(eval_sequences):
     robot_obs, scene_obs = get_env_state_for_initial_condition(initial_state)
     env.reset(robot_obs=robot_obs, scene_obs=scene_obs)
-    while True:
-        time.sleep(1)
-        
+    for subtask in eval_sequence:
+        print(i, subtask)
+    time.sleep(1)
