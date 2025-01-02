@@ -5,14 +5,17 @@ from omegaconf import OmegaConf
 import hydra
 import os
 import time
+import argparse
 import numpy as np
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--states', action='store_true')
+args = parser.parse_args()
 
-## see dataset/calvin_debug_dataset/training/.hydra/merged_config.yaml
-path = "dataset/calvin_debug_dataset/validation/.hydra/merged_config.yaml"
-assert os.path.exists(path)
-render_conf = OmegaConf.load(path)
-# env = hydra.utils.instantiate(render_conf.env, show_gui=True, use_vr=False, use_scene_info=True)
+dataset_dir = "dataset/calvin_debug_dataset/validation"
+conf_path = f"{dataset_dir}/.hydra/merged_config.yaml"
+assert os.path.exists(conf_path)
+render_conf = OmegaConf.load(conf_path)
 env = PlayTableSimEnv(
     robot_cfg=render_conf.robot,
     scene_cfg=render_conf.scene,
@@ -26,23 +29,22 @@ env = PlayTableSimEnv(
     control_freq=30,
 )
 
-## Replay
-# start_id = 358482
-# for i in range(1000, 10000): 
-#     path = f"dataset/calvin_debug_dataset/training/episode_{start_id + i:07d}.npz"
-#     data = np.load(path)
-#     actions, rel_actions, robot_obs, scene_obs = data['actions'], data['rel_actions'], data['robot_obs'], data['scene_obs']
+ann_path = f"{dataset_dir}/lang_annotations/auto_lang_ann.npy"
+auto_lang_ann = np.load(ann_path, allow_pickle=True).item()
+intervals = auto_lang_ann['info']['indx']
 
-#     print(i)
-#     env.reset(robot_obs=robot_obs, scene_obs=scene_obs)
-#     env.render()
+for traj_idx, (start_id, end_id) in enumerate(intervals):
+    task_name = auto_lang_ann['language']['task'][traj_idx]
+    print(traj_idx, task_name, start_id, end_id)
+    for i in range(start_id, end_id):
+        path = f"{dataset_dir}/episode_{i:07d}.npz"
+        data = np.load(path)
+        actions, rel_actions, robot_obs, scene_obs = data['actions'], data['rel_actions'], data['robot_obs'], data['scene_obs']
 
-## Evaluate
-eval_sequences = get_sequences(1000)
-
-for i, (initial_state, eval_sequence) in enumerate(eval_sequences):
-    robot_obs, scene_obs = get_env_state_for_initial_condition(initial_state)
-    env.reset(robot_obs=robot_obs, scene_obs=scene_obs)
-    for subtask in eval_sequence:
-        print(i, subtask)
-    time.sleep(1)
+        if i == start_id:
+            env.reset(robot_obs=robot_obs, scene_obs=scene_obs)
+        
+        if args.states:
+            env.reset(robot_obs=robot_obs, scene_obs=scene_obs)
+        else:
+            env.step(rel_actions)
