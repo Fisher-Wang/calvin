@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Replay Demo",
+            "type": "debugpy",
+            "request": "launch",
+            "python": "${command:python.interpreterPath}",
+            "program": "${workspaceFolder}/replay_demo.py",
+            "args": [
+                // "--states",
+            ],
+            "env": {
+                "DISPLAY": ":1"
+            },
+            "console": "integratedTerminal",
+        },
+    ]
+}

@@ -1,5 +1,6 @@
 import torch
 
+
 def quat_from_euler_xyz(roll: torch.Tensor, pitch: torch.Tensor, yaw: torch.Tensor) -> torch.Tensor:
     """Convert rotations given as Euler angles in radians to Quaternions.
 
