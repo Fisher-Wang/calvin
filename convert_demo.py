@@ -41,6 +41,7 @@ traj = {FRANKA_NAME: []}
 
 for traj_idx, (start_id, end_id) in enumerate(intervals):
     task_name = auto_lang_ann["language"]["task"][traj_idx]
+    ## XXX: maybe start_id should not equal start_id or end_id?
     if not scene_info[f"calvin_scene_{args.scene}"][0] <= start_id <= scene_info[f"calvin_scene_{args.scene}"][1]:
         continue
     if task_name != args.task:
