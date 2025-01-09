@@ -72,8 +72,9 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
         }
 
         ## See https://github.com/mees/calvin/blob/main/dataset/README.md#state-observation; Update: this is totally fucked up.
-        movable_objects = list(obj["file"] for obj in scene_cfg["objects"]["movable_objects"].values())
-        movable_objects = [o.replace("blocks/", "").replace(".urdf", "") for o in movable_objects]
+        # movable_objects = list(obj["file"] for obj in scene_cfg["objects"]["movable_objects"].values())
+        # movable_objects = [o.replace("blocks/", "").replace(".urdf", "") for o in movable_objects]
+        movable_objects = list(scene_cfg["objects"]["movable_objects"].keys())
         state = {
             "table": {
                 "pos": [0.0, 0.0, 0.0],
