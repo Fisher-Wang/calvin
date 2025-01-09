@@ -1,0 +1,38 @@
+{
+    // Formatting
+    "[python]": {
+        "editor.tabSize": 4,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+    },
+    "isort.args": [
+        "--profile", "black", "--filter-files"
+    ],
+    "black-formatter.args": [
+        "--unstable",
+        "--line-length", "120",
+    ],
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "files.trimTrailingWhitespace": true,
+    "editor.rulers": [120],
+
+    // Python
+    "python.defaultInterpreterPath": "${env:HOME}/miniconda3/envs/calvin_venv/bin/python",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/calvin_env",
+        "${workspaceFolder}/calvin_models"
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "dataset/task_ABC_D": true,
+    },
+}
