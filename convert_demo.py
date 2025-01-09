@@ -6,6 +6,7 @@ from typing import Literal
 import numpy as np
 import torch
 import tyro
+import yaml
 
 from utils import quat_from_euler_xyz
 
@@ -31,7 +32,7 @@ scene_info_path = f"{args.dataset_dir}/scene_info.npy"
 auto_lang_ann = np.load(ann_path, allow_pickle=True).item()
 scene_info = np.load(scene_info_path, allow_pickle=True).item()
 intervals = auto_lang_ann["info"]["indx"]
-
+scene_cfg = yaml.load(open(f"calvin_env/conf/scene/calvin_scene_{args.scene}.yaml"), Loader=yaml.FullLoader)
 
 FRANKA_NAME = "franka_with_gripper_extension"
 
@@ -70,7 +71,9 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
             "panda_finger_joint2": 0.04 if robot_obs[14] == 1 else 0.0,
         }
 
-        ## See https://github.com/mees/calvin/blob/main/dataset/README.md#state-observation
+        ## See https://github.com/mees/calvin/blob/main/dataset/README.md#state-observation; Update: this is totally fucked up.
+        movable_objects = list(obj["file"] for obj in scene_cfg["objects"]["movable_objects"].values())
+        movable_objects = [o.replace("blocks/", "").replace(".urdf", "") for o in movable_objects]
         state = {
             "table": {
                 "pos": [0.0, 0.0, 0.0],
@@ -82,19 +85,19 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
                     "base__switch": scene_obs[3].item(),
                 },
             },
-            "block_red": {
+            movable_objects[0]: {
                 "pos": scene_obs[6:9].tolist(),
                 "rot": quat_from_euler_xyz(
                     torch.tensor(scene_obs[9]), torch.tensor(scene_obs[10]), torch.tensor(scene_obs[11])
                 ).tolist(),
             },
-            "block_blue": {
+            movable_objects[1]: {
                 "pos": scene_obs[12:15].tolist(),
                 "rot": quat_from_euler_xyz(
                     torch.tensor(scene_obs[15]), torch.tensor(scene_obs[16]), torch.tensor(scene_obs[17])
                 ).tolist(),
             },
-            "block_pink": {
+            movable_objects[2]: {
                 "pos": scene_obs[18:21].tolist(),
                 "rot": quat_from_euler_xyz(
                     torch.tensor(scene_obs[21]), torch.tensor(scene_obs[22]), torch.tensor(scene_obs[23])
@@ -123,5 +126,5 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
     # break
 
 os.makedirs(args.save_dir, exist_ok=True)
-with open(f"{args.save_dir}/{args.scene}_{args.task}_v2.pkl", "wb") as f:
+with open(f"{args.save_dir}/{args.task}_{args.scene}_v2.pkl", "wb") as f:
     pickle.dump(traj, f)
