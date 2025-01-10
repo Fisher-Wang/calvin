@@ -71,6 +71,12 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
             "panda_finger_joint1": 0.04 if robot_obs[14] == 1 else 0.0,
             "panda_finger_joint2": 0.04 if robot_obs[14] == 1 else 0.0,
         }
+        if task_name in ["place_in_slider", "place_in_drawer", "stack_block"] and i == start_id:
+            ## HACK: at the first frame, the gripper is open, so these tasks work well in other simulators.
+            ## Otherwise, the gripper is closed, but the robot should have been already holding the block,
+            ## so it penetrates the block, which leads to a failure.
+            robot_dof_pos["panda_finger_joint1"] = 0.04
+            robot_dof_pos["panda_finger_joint2"] = 0.04
 
         ## See https://github.com/mees/calvin/blob/main/dataset/README.md#state-observation; Update: this is totally fucked up.
         # movable_objects = list(obj["file"] for obj in scene_cfg["objects"]["movable_objects"].values())
@@ -106,7 +112,7 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
                 ).tolist(),
             },
             FRANKA_NAME: {
-                # see calvin_env/conf/scene/calvin_scene_A.yaml
+                # see calvin_env/conf/scene/calvin_scene_A.yaml, same for all A, B, C, D
                 "pos": [-0.34, -0.46, 0.24],
                 "rot": [1.0, 0.0, 0.0, 0.0],
                 "dof_pos": robot_dof_pos,
@@ -128,5 +134,8 @@ for traj_idx, (start_id, end_id) in enumerate(intervals):
     # break
 
 os.makedirs(args.save_dir, exist_ok=True)
-with open(f"{args.save_dir}/{args.task}_{args.scene}_v2.pkl", "wb") as f:
+save_path = f"{args.save_dir}/{args.task}_{args.scene}_v2.pkl"
+with open(save_path, "wb") as f:
     pickle.dump(traj, f)
+
+print(f"Saved to {save_path}")
