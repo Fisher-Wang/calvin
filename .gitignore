@@ -144,5 +144,5 @@ calvin_venv/*
 # Ignore datasets as downloaded according to instructions
 dataset/*
 
-*.ipynb
+# *.ipynb
 tmp/
